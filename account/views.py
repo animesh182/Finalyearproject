@@ -9,29 +9,30 @@ from django.contrib.auth import login, logout
 
 def account_login(request):
     if request.user.is_authenticated:
-        if request.user.user_type == '1':
+        if request.user.user_type == 'Administrator':
             return redirect(reverse("adminDashboard"))
         else:
             return redirect(reverse("voterDashboard"))
-
+        
     context = {}
     if request.method == 'POST':
         user = EmailBackend.authenticate(request, username=request.POST.get(
             'email'), password=request.POST.get('password'))
         if user != None:
             login(request, user)
-            if user.user_type == '1':
+            if user.user_type == 'Administrator':
                 return redirect(reverse("adminDashboard"))
             else:
                 return redirect(reverse("voterDashboard"))
         else:
             messages.error(request, "Invalid details")
-            return redirect("/")
+            # return redirect("/")
 
     return render(request, "voting/login.html", context)
 
 
 def account_register(request):
+
     userForm = CustomUserForm(request.POST or None)
     voterForm = VoterForm(request.POST or None)
     context = {
@@ -54,6 +55,7 @@ def account_register(request):
 
 
 def account_logout(request):
+
     user = request.user
     if user.is_authenticated:
         logout(request)

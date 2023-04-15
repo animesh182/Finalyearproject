@@ -23,11 +23,12 @@ def generate_ballot(display_controls=False):
     output = ""
     candidates_data = ""
     num = 1
-    # return None
     for position in positions:
         name = position.name
         position_name = slugify(name)
         candidates = Candidate.objects.filter(position=position)
+        if  not candidates:
+            return redirect(reverse('account_login'))
         for candidate in candidates:
             if position.max_vote > 1:
                 instruction = "You may select up to " + \
@@ -101,6 +102,7 @@ def generate_otp():
 
 def dashboard(request):
     user = request.user
+    print(user.voter.verified)
     # * Check if this voter has been verified
     if user.voter.otp is None or user.voter.verified == False:
         if not settings.SEND_OTP:
@@ -113,6 +115,7 @@ def dashboard(request):
     else:
         if user.voter.voted:  # * User has voted
             # To display election result or candidates I voted for ?
+            print('Maile vote garisake')
             context = {
                 'my_votes': Votes.objects.filter(voter=user.voter),
             }
@@ -235,6 +238,7 @@ def verify_otp(request):
 def show_ballot(request):
     if request.user.voter.voted:
         messages.error(request, "You have voted already")
+
         context = {
                 'my_votes': Votes.objects.filter(voter=request.user.voter),
             }
